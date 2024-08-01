@@ -25,7 +25,7 @@
 	<Card.Content>
 		<div class="grid gap-6">
 			<div class="grid gap-3">
-				<Label for="filter-maxspeed">Vitesse en Km/h</Label>
+				<Label for="filter-maxspeed">Vitesse maximum en Km/h</Label>
 				<Select.Root bind:selected>
 					<Select.Trigger id="filter-maxspeed" aria-label="Select maxspeed">
 						<Select.Value placeholder="Select maxspeed" />
