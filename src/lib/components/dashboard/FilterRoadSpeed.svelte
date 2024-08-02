@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
 	import { maxSpeedLimitStore, MaxSpeedFilters } from '../../../stores/leaflet';
-	import type { TMaxSpeedLimit, TMaxSpeedOption } from '$lib/domain/entities/Leaflet';
+	import type { TMaxSpeedLimit } from '$lib/domain/entities/Leaflet';
 
-	let selected: TMaxSpeedOption = MaxSpeedFilters[0];
-
+	let selected: TMaxSpeedLimit[] = $maxSpeedLimitStore;
 	onMount(() => {
-		maxSpeedLimitStore.subscribe((value: TMaxSpeedLimit) => {
-			selected = MaxSpeedFilters.find((option) => option.value === value) || MaxSpeedFilters[0];
+		maxSpeedLimitStore.subscribe((value: TMaxSpeedLimit[]) => {
+			selected = value;
 		});
 	});
 
-	$: maxSpeedLimitStore.set(selected.value);
+	$: maxSpeedLimitStore.set(selected);
 </script>
 
 <Card.Root>
@@ -22,36 +21,35 @@
 		<Card.Title>Filtrer les routes par limitation de vitesse</Card.Title>
 		<Card.Description>Données fourni par OpenStreetMap</Card.Description>
 	</Card.Header>
-	<Card.Content>
-		<div class="grid gap-6">
-			<div class="grid gap-3">
-				<Label for="filter-maxspeed">Vitesse maximum en Km/h</Label>
-				<Select.Root bind:selected>
-					<Select.Trigger id="filter-maxspeed" aria-label="Select maxspeed">
-						<Select.Value placeholder="Select maxspeed" />
-					</Select.Trigger>
-					<Select.Content>
-						{#each MaxSpeedFilters as { value, label, disabled }}
-							<Select.Item {value} {label} {disabled}>
-								{label}
-							</Select.Item>
-						{/each}
-					</Select.Content>
-				</Select.Root>
-			</div>
-		</div>
-	</Card.Content>
-	<Card.Footer class="flex flex-wrap">
+	<Card.Content class="flex flex-wrap gap-4">
 		{#each MaxSpeedFilters as { value, label, disabled, color }}
-			<div class="flex w-1/2 flex-col px-2">
-				<p class="text-sm text-gray-500">
-					{label} km/h
-				</p>
-				<div class="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
-					<div style={`background-color: ${color};`} class={`h-full w-full flex-1`}></div>
+			{@const checked = $maxSpeedLimitStore.includes(value)}
+			<div class="items-top flex space-x-2">
+				<!-- <Checkbox bind:checked id={`checkbox-${value}`} /> -->
+				<Checkbox
+					{checked}
+					onCheckedChange={(v) => {
+						if (v) {
+							$maxSpeedLimitStore = [...$maxSpeedLimitStore, value];
+						}
+						if (!v) {
+							$maxSpeedLimitStore = $maxSpeedLimitStore.filter((i) => i !== value);
+						}
+					}}
+					id={`checkbox-${value}`}
+				/>
+				<div class="grid gap-1.5 leading-none">
+					<Label
+						for={`checkbox-${value}`}
+						class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+					>
+						{label} km/h
+					</Label>
+					<div class="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
+						<div style={`background-color: ${color};`} class={`h-full w-full flex-1`}></div>
+					</div>
 				</div>
 			</div>
 		{/each}
-		<!-- </div> -->
-	</Card.Footer>
+	</Card.Content>
 </Card.Root>
