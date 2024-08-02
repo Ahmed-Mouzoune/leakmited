@@ -20,10 +20,11 @@ type LeafletGeoJson = FeatureCollection;
 
 type LeafletLayerGroup = LayerGroup | null | undefined;
 
-type TMaxSpeedLimit = number | undefined;
+type TMaxSpeedLimit = number;
 type TMaxSpeedOption = {
 	value: TMaxSpeedLimit;
 	label: string;
 	disabled?: boolean;
 	color: string;
+	checked?: boolean;
 };

@@ -10,8 +10,16 @@ import type {
 } from '$lib/domain/repositories/LeafletRepository';
 import type { IMapOption, LeafletLayerGroup } from '$lib/domain/entities/Leaflet';
 
+// Assurez-vous que votre fichier GeoJSON est accessible via `/data/speed_limits.geojson`
+const localGeoJsonUrl = '/data/48-8566_2-3522_5000.geojson';
+
 export class LeafletRepository implements ILeafletRepository {
-	async fetchHighwayMaxSpeed({ around, lat, lng }: IFetchHighwayMaxSpeed) {
+	async fetchHighwayMaxSpeedLocal() {
+		const response = await fetch(localGeoJsonUrl);
+		const geoJsonData = await response.json();
+		return geoJsonData;
+	}
+	async fetchHighwayMaxSpeedOverpassApi({ around, lat, lng }: IFetchHighwayMaxSpeed) {
 		const overpassUrl = 'https://overpass-api.de/api/interpreter';
 		const query = `
 				[out:json];
@@ -28,6 +36,7 @@ export class LeafletRepository implements ILeafletRepository {
 
 		const response = await fetch(overpassUrl, {
 			method: 'POST',
+			cache: 'reload',
 			body: query,
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -53,21 +62,21 @@ export class LeafletRepository implements ILeafletRepository {
 			return L.geoJSON(geoJsonData, {
 				style: (feature) => {
 					const maxspeed = Number(feature?.properties?.maxspeed);
-					const color = MaxSpeedFilters.filter((option) => option.value == maxspeed)?.[0]?.color;
-					// Si la vitesse de la route ne respecte pas le filtre on ne l'affiche pas
-					if (maxSpeedLimit && maxSpeedLimit < maxspeed) return { color: undefined };
-					return { color };
+					let color: string | undefined = MaxSpeedFilters.filter(
+						(option) => option.value == maxspeed
+					)?.[0]?.color;
+					return { color, className: 'stroke-2' };
 				},
 				onEachFeature: (feature, layer) => {
 					const maxspeed = Number(feature?.properties?.maxspeed);
-					if (maxspeed) {
-						if (maxSpeedLimit && maxspeed <= maxSpeedLimit) {
-							layer.bindPopup(`Limitation de vitesse: ${feature.properties.maxspeed} km/h`);
-						}
-						if (!maxSpeedLimit) {
-							layer.bindPopup(`Limitation de vitesse: ${feature.properties.maxspeed} km/h`);
-						}
-					}
+					if (layer && maxSpeedLimit.includes(maxspeed))
+						layer.bindPopup(`Limitation de vitesse: ${feature.properties.maxspeed} km/h`);
+				},
+				filter: (geoJsonFeature) => {
+					const maxspeed = Number(geoJsonFeature?.properties?.maxspeed);
+					if (!maxspeed) return false;
+					if (!maxSpeedLimit.includes(maxspeed)) return false;
+					return true;
 				}
 			});
 		}

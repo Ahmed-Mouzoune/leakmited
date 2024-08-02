@@ -25,22 +25,27 @@
 				lat: latIDF,
 				lng: lngIDF
 			});
-			geoJsonData = await LeafletRepo.fetchHighwayMaxSpeed({
-				around,
-				lat: latIDF,
-				lng: lngIDF
-			});
+			// geoJsonData = await LeafletRepo.fetchHighwayMaxSpeedOverpassApi({
+			// 	around,
+			// 	lat: latIDF,
+			// 	lng: lngIDF
+			// });
+			geoJsonData = await LeafletRepo.fetchHighwayMaxSpeedLocal();
 			geoJsonDataStore.set(geoJsonData);
 		}
-		maxSpeedLimitStore.subscribe(async (value) => {
-			if (layerGroup) await LeafletRepo.removeLayerGroup(layerGroup);
-			layerGroup = await LeafletRepo.createLayerGroup({
+	});
+
+	$: {
+		if (map) {
+			LeafletRepo.removeLayerGroup(layerGroup);
+			layerGroup = LeafletRepo.createLayerGroup({
 				geoJsonData: $geoJsonDataStore,
+				layerGroup: layerGroup,
 				map,
 				maxSpeedLimit: $maxSpeedLimitStore
 			})?.addTo(map);
-		});
-	});
+		}
+	}
 
 	onDestroy(() => {
 		if (map) {

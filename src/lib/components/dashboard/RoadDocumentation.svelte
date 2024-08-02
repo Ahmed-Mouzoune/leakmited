@@ -3,17 +3,16 @@
 	import { PieChart, type ChartTabularData, type PieChartOptions } from '@carbon/charts-svelte';
 	import '@carbon/charts-svelte/styles.css';
 	import { geoJsonDataStore } from '../../../stores/leaflet';
-	import { MaxSpeedFilters } from '../../../stores/leaflet';
 	import {
 		converMaxSpeedFilterToPieChartColors,
 		convertGeoJsonToCarbonChartData
 	} from '$lib/domain/usecases/Leaflet';
 	let data: ChartTabularData = [];
 
+	const chartColors = converMaxSpeedFilterToPieChartColors();
 	geoJsonDataStore.subscribe((value) => {
 		data = convertGeoJsonToCarbonChartData(value);
 	});
-	const chartColors = converMaxSpeedFilterToPieChartColors();
 	let options: PieChartOptions = {
 		title: 'Pourcentage de route en km/h',
 		resizable: true,

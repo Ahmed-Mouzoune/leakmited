@@ -5,7 +5,7 @@ import { MaxSpeedFilters } from '../../../stores/leaflet';
 export const convertGeoJsonToCarbonChartData = (geoJsonData: LeafletGeoJson) => {
 	let data: ChartTabularData = [];
 	if (geoJsonData?.type === 'FeatureCollection') {
-		data = MaxSpeedFilters.slice(1).map((MaxSpeedFilter) => ({
+		data = MaxSpeedFilters.map((MaxSpeedFilter) => ({
 			group: MaxSpeedFilter.label,
 			maxspeed: MaxSpeedFilter.value,
 			value: geoJsonData?.features?.filter(
