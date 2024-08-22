@@ -19,6 +19,7 @@
 		"@types/eslint": "^9.6.0",
 		"@types/leaflet": "^1.9.12",
 		"@types/osmtogeojson": "^2.2.34",
+		"@types/pg": "^8.11.6",
 		"autoprefixer": "^10.4.19",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -40,9 +41,11 @@
 		"@carbon/charts-svelte": "^1.19.2",
 		"bits-ui": "^0.21.13",
 		"clsx": "^2.1.1",
+		"dotenv": "^16.4.5",
 		"leaflet": "^1.9.4",
 		"lucide-svelte": "^0.417.0",
 		"osmtogeojson": "^3.0.0-beta.5",
+		"pg": "^8.12.0",
 		"tailwind-merge": "^2.4.0",
 		"tailwind-variants": "^0.2.1"
 	}

@@ -1,5 +1,8 @@
 node_modules
 
+# database config
+database-config
+
 # Output
 .output
 .vercel

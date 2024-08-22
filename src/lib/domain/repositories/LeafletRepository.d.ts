@@ -10,7 +10,6 @@ interface ILeafletRepository {
 	}: ICreateLayerGroup): LeafletLayerGroup;
 	removeLayerGroup(layerGroup: LayerGroup, map: L.Map): void;
 	fetchHighwayMaxSpeedOverpassApi({ around, lat, lng }: IFetchHighwayMaxSpeed): LeafletGeoJson;
-	fetchHighwayMaxSpeedLocal(): LeafletGeoJson;
 }
 interface ICreateLayerGroup {
 	geoJsonData: LeafletGeoJson;

@@ -26,5 +26,3 @@ export const MaxSpeedFilters: TMaxSpeedOption[] = [
 ];
 // Store pour le filtre de vitesse
 export const maxSpeedLimitStore = writable<TMaxSpeedLimit[]>([MaxSpeedFilters[0].value]);
-
-export const geoJsonDataStore = writable<LeafletGeoJson>();
