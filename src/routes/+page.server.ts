@@ -7,11 +7,14 @@ let lastFetchTime = 0;
 const CACHE_TTL = 60 * 1440 * 1000; // Durée de vie du cache : 24 heures
 
 export const load = async () => {
+	// await new Promise((res) => setTimeout(res, 1000));
 	try {
 		console.log('load server');
 
 		const currentTime = Date.now();
 		const isCacheValid = cachedData && currentTime - lastFetchTime < CACHE_TTL;
+
+		console.log('isCacheValid', isCacheValid);
 
 		// Si le cache est valide, retourner les données en cache
 		if (isCacheValid) {

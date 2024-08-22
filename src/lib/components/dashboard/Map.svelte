@@ -2,18 +2,26 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { maxSpeedLimitStore } from '../../../stores/leaflet';
-	import { LeafletRepository } from '$lib/infrastructure/repositories/LeafletRepository';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 
 	export let geoJsonData: LeafletGeoJson | null;
+	let LeafletRepo: null | ILeafletRepository = null;
 
-	let isLoading: boolean = false;
+	// Fonction pour charger le module côté client
+	async function loadClientLib() {
+		if (typeof window !== 'undefined') {
+			const module = await import('$lib/infrastructure/repositories/LeafletRepository');
+			LeafletRepo = new module.LeafletRepository();
+		}
+	}
+
+	// let isLoading: boolean = false;
 	let mapContainer: HTMLDivElement;
 	let map: L.Map | undefined;
 	let layerGroup: LeafletLayerGroup;
-	const LeafletRepo = new LeafletRepository();
 
 	onMount(async () => {
+		await loadClientLib();
 		if (browser) {
 			// Coordonnées île de france
 			const latIDF: number = 48.8566;
@@ -28,7 +36,7 @@
 
 	$: {
 		if (map) {
-			isLoading = true;
+			// isLoading = true;
 			LeafletRepo.removeLayerGroup(layerGroup);
 			layerGroup = LeafletRepo.createLayerGroup({
 				geoJsonData: geoJsonData,
@@ -36,7 +44,7 @@
 				map,
 				maxSpeedLimit: $maxSpeedLimitStore
 			})?.addTo(map);
-			isLoading = false;
+			// isLoading = false;
 		}
 	}
 
@@ -48,12 +56,12 @@
 </script>
 
 <div class="relative">
-	{#if isLoading}
+	<!-- {#if isLoading}
 		<Skeleton class="absolute left-0 top-0 z-10 h-full w-full" />
 	{/if}
-	{#if !isLoading}
-		<div class="map-leaflet" bind:this={mapContainer} />
-	{/if}
+	{#if !isLoading} -->
+	<div class="map-leaflet" bind:this={mapContainer} />
+	<!-- {/if} -->
 </div>
 
 <style>
