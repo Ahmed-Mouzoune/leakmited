@@ -1,7 +1,5 @@
-// src/lib/database.ts
-
-import pg from 'pg';
 import dotenv from 'dotenv';
+import pg from 'pg';
 const { Pool } = pg;
 
 dotenv.config();
@@ -15,22 +13,28 @@ const pool = new Pool({
 	idleTimeoutMillis: 30000
 });
 
-export async function fetchRoutes() {
+export async function fetchRoutesAroundPoint({
+	lat,
+	lon,
+	radius
+}: {
+	lat: number;
+	lon: number;
+	radius: number;
+}) {
 	try {
-		const result = await pool.query(
-			`SELECT osm_id, highway, name, maxspeed, ST_AsGeoJSON(ST_Transform(way, 4326)) as geojson
-       FROM planet_osm_roads
-       WHERE highway IS NOT NULL
-       AND maxspeed IS NOT NULL`
-		);
+		const query = `SELECT maxspeed, ST_AsGeoJSON(ST_Transform(way, 4326)) as geojson
+		   FROM planet_osm_roads
+		   WHERE highway IS NOT NULL
+		   AND maxspeed IS NOT NULL
+			AND ST_DWithin(way, ST_Transform(ST_SetSRID(ST_MakePoint($1, $2), 4326), 3857), $3)
+		`;
+		const result = await pool.query(query, [lon, lat, radius]);
 
 		const features = result.rows.map((row) => ({
 			type: 'Feature',
 			geometry: JSON.parse(row.geojson),
 			properties: {
-				osm_id: row.osm_id,
-				highway: row.highway,
-				name: row.name,
 				maxspeed: row.maxspeed
 			}
 		}));
@@ -41,8 +45,52 @@ export async function fetchRoutes() {
 		};
 
 		return geojson;
-	} catch (error) {
-		console.error('Erreur lors de la requête PostgreSQL:', error);
-		throw new Error('Erreur lors de la récupération des routes');
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			throw new Error(`Erreur lors de la récupération des routes: ${error.message}`);
+		}
+
+		throw new Error('Erreur inconnue lors de la récupération des routes');
+	}
+}
+
+export async function fetchAllRoutes() {
+	try {
+		const result = await pool.query(
+			`SELECT maxspeed, ST_AsGeoJSON(ST_Transform(way, 4326)) as geojson
+			FROM (
+				SELECT maxspeed, way
+				FROM planet_osm_line
+				WHERE highway IS NOT NULL
+				AND maxspeed IS NOT NULL
+				UNION
+				SELECT maxspeed, way
+				FROM planet_osm_roads
+				WHERE highway IS NOT NULL
+				AND maxspeed IS NOT NULL
+			) AS combined;
+			`
+		);
+
+		const features = result.rows.map((row) => ({
+			type: 'Feature',
+			geometry: JSON.parse(row.geojson),
+			properties: {
+				maxspeed: row.maxspeed
+			}
+		}));
+
+		const geojson = {
+			type: 'FeatureCollection',
+			features: features
+		};
+
+		return geojson;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			throw new Error(`Erreur lors de la récupération des routes: ${error.message}`);
+		}
+
+		throw new Error('Erreur inconnue lors de la récupération des routes');
 	}
 }

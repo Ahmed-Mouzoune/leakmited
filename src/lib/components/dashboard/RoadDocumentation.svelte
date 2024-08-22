@@ -7,7 +7,7 @@
 		convertGeoJsonToCarbonChartData
 	} from '$lib/domain/usecases/Leaflet';
 	export let geoJsonData: LeafletGeoJson | null;
-	let data: ChartTabularData = convertGeoJsonToCarbonChartData(geoJsonData);
+	$: data = convertGeoJsonToCarbonChartData(geoJsonData);
 
 	const chartColors = converMaxSpeedFilterToPieChartColors();
 	let options: PieChartOptions = {
