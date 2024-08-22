@@ -1,22 +1,34 @@
 <script>
-	/** @type {import('./$types').PageData} */
 	import RoadDocumentation from '$lib/components/dashboard/RoadDocumentation.svelte';
 	import FilterRoadSpeed from '$lib/components/dashboard/FilterRoadSpeed.svelte';
 	import Map from '$lib/components/dashboard/Map.svelte';
 	import { onMount } from 'svelte';
 
-	export let data;
-	let isLoading = true;
-	const { geoJsonData } = data;
+	let geoJsonData = null;
+	let isLoading = false;
 
-	onMount(() => {
-		isLoading = false;
+	onMount(async () => {
+		try {
+			isLoading = true;
+
+			const response = await fetch('/api/routes');
+			if (response.ok) {
+				const res = await response.json();
+				geoJsonData = res.geoJsonData;
+				console.log('geoJsonData', geoJsonData);
+			}
+			if (!response.ok) console.error('Erreur lors du fetch des routes');
+		} catch (error) {
+			console.error('Erreur lors du fetch:', error);
+		} finally {
+			isLoading = false;
+		}
 	});
 </script>
 
 <main class="container">
 	<h1 class="my-4 text-center text-3xl">Carte de l'Île-de-France</h1>
-	{#if !isLoading}
+	{#if !isLoading && geoJsonData}
 		<div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
 			<div class="flex flex-col gap-4 sm:col-span-1">
 				<FilterRoadSpeed />
