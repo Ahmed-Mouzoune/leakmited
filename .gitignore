@@ -1,7 +1,7 @@
 node_modules
 
-# database config
-database-config
+# OpenStreetMap files
+*.osm.pbf
 
 # Output
 .output
